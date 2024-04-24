@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import (
-    Application,
+    ApplicationBuilder,
     CallbackQueryHandler,
     CommandHandler,
     MessageHandler,
@@ -15,6 +15,7 @@ from telegram.ext import (
 import logging
 
 from __db__.db import connect_db, get_user, set_user, update_user
+from __api__.index import get, transfer
 
 logging.basicConfig(format="%(asctime)s -%(name)s - %(levelname)s - %(message)s", level=logging.INFO)
 logging.getLogger("httpx").setLevel(logging.WARNING)
@@ -36,18 +37,23 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
         if update.message.chat.type == "private":
             _user = get_user(db=db, query={"userId" : user.id})
+            info = get()
+            print(info)
 
             if not _user:
                 context.user_data["username"] = user.username
                 context.user_data["user_id"] = user.id
 
+                print(context.args)
+
                 ref = 0
 
                 if len(context.args) > 0:
                     ref = context.args[0]
+                    print(ref)
 
-                    update_user(db=db, query={"username" : ref}, value={"$push" : {"referrals" : user.username}})
-                    update_user(db=db, query={"username" : ref}, value={"$inc" : {"referral_balance" : 150}})
+                    update_user(db=db, query={"userId" : int(ref)}, value={"$push" : {"referrals" : user.username}})
+                    update_user(db=db, query={"userId" : int(ref)}, value={"$inc" : {"referral_balance" : 50}})
 
                 user_ = set_user(db=db, value={"userId" : user.id, "username" : user.username, "balance" : 0, "address" : "0x0", "twitter": "--", "discord": "--", "referee": ref, "referrals": [], "referral_balance": 0})
                 print(user_)
@@ -56,11 +62,11 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
                     [InlineKeyboardButton("Continue 🚀", callback_data="continue")]
                 ]
                 reply_markup = InlineKeyboardMarkup(keyboard)
-                reply_msg = f"<b>Hello {user.username} 🎉, I am your friendly $GWEI Airdrop Bot 🤖.</b>\n\n<i>🎁 Earn Free 150 GWEI (~$10) For Completing All Task.</i>\n\n<i>👨‍👨‍👦 Earn 150 GWEI (~$10) For Every Each Referral.</i>\n\n<b>📢 Airdrop Rules:</b>\n\n<i>🔰 Join <a href='https://t.me/GWEITOKEN'>@GWEITOKEN</a></i>\n\n<b>🚨 Must Complete The Task & Click On [Continue] To Proceed</b>"
+                reply_msg = f"<b>Hello {user.username} 🎉, I am your friendly $GWEI Airdrop Bot 🤖.</b>\n\n<i>🎁 Earn Free 150 GWEI For Completing All Task.</i>\n\n<i>👨‍👨‍👦 Earn 50 GWEI For Every Each Referral.</i>\n\n<b>📢 Airdrop Rules:</b>\n\n<i>🔰 Join <a href='https://t.me/GWEITOKEN'>@GWEITOKEN</a></i>\n\n<b>🚨 Must Complete The Task & Click On [Continue] To Proceed</b>"
 
                 await update.message.reply_html(text=reply_msg, reply_markup=reply_markup)
             else:
-                reply_msg = f"<b>🚀 $GWEI Free Airdrop Is Live!</b>\n\n<i>🎁 Bonus: 150 $GWEI (~$10)</i>\n\n<i>👨‍👨‍👦 Referral: 150 $GWEI (~$10)</i>\n\n<i>🔗 Airdrop Link :- <a href='https://t.me/gwei_airdrop_bot?start={user.id}'>https://t.me/gwei_airdrop_bot?start={user.id}</a></i>\n\n<b>💰 Don't Miss This Free Income Chance!</b>"
+                reply_msg = f"<b>🚀 $GWEI Free Airdrop Is Live!</b>\n\n<i>🎁 Bonus: 150 $GWEI </i>\n\n<i>👨‍👨‍👦 Referral: 50 $GWEI </i>\n\n<i>🔗 Airdrop Link :- <a href='https://t.me/gwei_airdrop_bot?start={user.id}'>https://t.me/gwei_airdrop_bot?start={user.id}</a></i>\n\n<b>💰 Don't Miss This Free Income Chance!</b>"
                 await update.message.reply_html(text=reply_msg)
             
             return START
@@ -93,12 +99,14 @@ async def _start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
         try:
             member = await context.bot.get_chat_member(chat, user_id)
+            user_status = member.status
+            print(f"CHAT MEMBER: {user_status}")
         except Exception as e:
             print(e)
             done = False
         else:
-            done = True
-            print(member)
+            if user_status in ["administrator", "member"]:
+                done = True
 
         if done:
             keyboard = [
@@ -223,7 +231,7 @@ async def address(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
             [InlineKeyboardButton("End Conversation 👋", callback_data="end")]
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        reply_msg = f"<b>Congratulations {user.username} 🎉, You have successfully completed all the tasks fot the $GWEI Airdrop.</b>\n\n<i>💰 Balance : 150 $GWEI (~$10)</i>\n\n<i>🔗 Your referral link is <a href='https://t.me/gwei_airdrop_bot?start={user.id}'>https://t.me/gwei_airdrop_bot?start={user.id}</a></i>\n\n<b>🚀 Please Share So Others Don't Miss This Free Income Chance!</b>"
+        reply_msg = f"<b>Congratulations {user.username} 🎉, You have successfully completed all the tasks fot the $GWEI Airdrop.</b>\n\n<i>💰 Balance : 150 $GWEI </i>\n\n<i>🔗 Your referral link is <a href='https://t.me/gwei_airdrop_bot?start={user.id}'>https://t.me/gwei_airdrop_bot?start={user.id}</a></i>\n\n<b>🚀 Please Share So Others Don't Miss This Free Income Chance!</b>"
 
         await update.message.reply_html(text=reply_msg, reply_markup=reply_markup)
 
@@ -264,15 +272,14 @@ async def referral(update: Update, context: ContextTypes.DEFAULT_TYPE):
             _user = get_user(db=db, query={"userId" : user.id})
             print(_user)
 
-            referrals = len(_user["referrals"])
-            balance = referrals * 150
-            _balance = referrals * 10
-
             if not _user:
                 reply_msg = "<b>🚨 You cannot use this command.</b>"
                 await update.message.reply_html(text=reply_msg)
             else:
-                reply_msg = f"<b>🔰 Here are your Referral details:</b>\n\n<i>👨‍👨‍👦 Referrals: {referrals}</i>\n\n<i>Referral Balance: {balance} $GWEI (~${_balance})</i>\n\n<i>🔗 Your referral link is <a href='https://t.me/gwei_airdrop_bot?start={user.id}'>https://t.me/gwei_airdrop_bot?start={user.id}</a></i>\n\n<b>🚀 Please Share So Others Don't Miss This Free Income Chance!</b>"
+                referrals = len(_user["referrals"])
+                balance = _user["referral_balance"]
+
+                reply_msg = f"<b>🔰 Here are your Referral details:</b>\n\n<i>👨‍👨‍👦 Referrals: {referrals}</i>\n\n<i>Referral Balance: {balance} $GWEI </i>\n\n<i>🔗 Your referral link is <a href='https://t.me/gwei_airdrop_bot?start={user.id}'>https://t.me/gwei_airdrop_bot?start={user.id}</a></i>\n\n<b>🚀 Please Share So Others Don't Miss This Free Income Chance!</b>"
                 await update.message.reply_html(text=reply_msg)
         else:
             reply_msg = "<b>🚨 This command is not used in groups</b>"
@@ -293,43 +300,27 @@ async def withdraw(update: Update, context: ContextTypes.DEFAULT_TYPE):
             _user = get_user(db=db, query={"userId" : user.id})
             print(_user)
 
-            balance = _user["balance"]
-            ref_balance = _user["referral_balance"]
-            _balance = (balance + ref_balance) / 15
-            referrals = len(_user["referrals"])
-
             if not _user:
                 reply_msg = "<b>🚨 You cannot use this command. You have to set your address before using this command</b>"
                 await update.message.reply_html(text=reply_msg)
             else:
-                args = context.args
+                balance = _user["balance"]
+                ref_balance = _user["referral_balance"]
+                referrals = len(_user["referrals"])
 
-                if len(args) == 1:
-                    if balance >= int(args[0]) and referrals >= 5:
-                        # _transfer = transfer(ADDRESS, _user["address"], int(args[0]))
-                        # print(_transfer)
+                if referrals >= 1 and (balance + ref_balance) > 0:
+                    _transfer = transfer(_user["address"], int(balance + ref_balance))
+                    print(_transfer)
 
-                        user_ = update_user(db=db, query={"userId" : user.id}, value={"$inc" :{"balance" : -int(args[0])}})
-                        print(user_)
+                    user_ = update_user(db=db, query={"userId" : user.id}, value={"$set" :{"balance" : 0}})
+                    user_ = update_user(db=db, query={"userId" : user.id}, value={"$set" :{"referral_balance" : 0}})
+                    print(user_)
 
-                        reply_msg = f"<b>🔰 Your Total Balance Is {balance + ref_balance} $GWEI (~${_balance}).</b>\n\n<i>🪫 Your withdrawal is been processed. This will take between 5 - 10 minutes.</i>\n\n<i>🔗 Your referral link is <a href='https://t.me/gwei_airdrop_bot?start={user.id}'>https://t.me/gwei_airdrop_bot?start={user.id}</a></i>\n\n<b>🚀 Please Share So Others Don't Miss This Free Income Chance!</b>"
-                        await update.message.reply_html(text=reply_msg)
-                    else:
-                        reply_msg = f"<b>🚨 Insufficent Funds Or You Do Not Have Enough Referrals, Your Total Balance Is {balance + ref_balance} $GWEI (~${_balance}) and Your Referrals Are {referrals}.</b>"
-                        await update.message.reply_html(text=reply_msg)
+                    reply_msg = f"<b>🔰 Your Total Balance Is {balance + ref_balance} $GWEI.</b>\n\n<i>🪫 Your withdrawal is been processed. This will take between 5 - 10 minutes.</i>\n\n<i>🔗 Your referral link is <a href='https://t.me/gwei_airdrop_bot?start={user.id}'>https://t.me/gwei_airdrop_bot?start={user.id}</a></i>\n\n<b>🚀 Please Share So Others Don't Miss This Free Income Chance!</b>"
+                    await update.message.reply_html(text=reply_msg)
                 else:
-                    if referrals >= 5:
-                        # _transfer = transfer(ADDRESS, _user["address"], int(args[0]))
-                        # print(_transfer)
-
-                        user_ = update_user(db=db, query={"userId" : user.id}, value={"$inc" :{"balance" : -int(balance + ref_balance)}})
-                        print(user_)
-
-                        reply_msg = f"<b>🔰 Your Total Balance Is {balance + ref_balance} $GWEI (~${_balance}).</b>\n\n<i>🪫 Your withdrawal is been processed. This will take between 5 - 10 minutes.</i>\n\n<i>🔗 Your referral link is <a href='https://t.me/gwei_airdrop_bot?start={user.id}'>https://t.me/gwei_airdrop_bot?start={user.id}</a></i>\n\n<b>🚀 Please Share So Others Don't Miss This Free Income Chance!</b>"
-                        await update.message.reply_html(text=reply_msg)
-                    else:
-                        reply_msg = f"<b>🚨 You Do Not Have Enough Referrals, Your Referrals Are {referrals}.</b>"
-                        await update.message.reply_html(text=reply_msg)
+                    reply_msg = f"<b>🚨 Insufficent Funds OR You Do Not Have Enough Referrals, Your Referrals Are {referrals}.</b>"
+                    await update.message.reply_html(text=reply_msg)
         else:
             reply_msg = "<b>🚨 This command is not used in groups</b>"
             await update.message.reply_html(text=reply_msg)
@@ -349,15 +340,14 @@ async def balance(update: Update, context: ContextTypes.DEFAULT_TYPE):
             _user = get_user(db=db, query={"username" : user.username})
             print(_user)
 
-            balance = _user["balance"]
-            ref_balance = _user["referral_balance"]
-            _balance = (balance + ref_balance) / 15
-
             if not _user:
                 reply_msg = "<b>🚨 You cannot use this command.</b>"
                 await update.message.reply_html(text=reply_msg)
             else:
-                reply_msg = f"<b>🔰 Your Total Balance Is {balance + ref_balance} $GWEI (~${int(_balance)}).</b>\n\n<i>🪙 Tasks Balance: {balance} $GWEI (~${int(balance / 15)})</i>\n\n<i>💰 Referral Balance: {ref_balance} $GWEI (~${int(ref_balance / 15)})</i>\n\n<i>🔗 Your referral link is <a href='https://t.me/gwei_airdrop_bot?start={user.id}'>https://t.me/gwei_airdrop_bot?start={user.id}</a></i>\n\n<b>🚀 Please Share So Others Don't Miss This Free Income Chance!</b>"
+                balance = _user["balance"]
+                ref_balance = _user["referral_balance"]
+
+                reply_msg = f"<b>🔰 Your Total Balance Is {balance + ref_balance} $GWEI.</b>\n\n<i>🪙 Tasks Balance: {balance} $GWEI.</i>\n\n<i>💰 Referral Balance: {ref_balance} $GWEI.</i>\n\n<i>🔗 Your referral link is <a href='https://t.me/gwei_airdrop_bot?start={user.id}'>https://t.me/gwei_airdrop_bot?start={user.id}</a></i>\n\n<b>🚀 Please Share So Others Don't Miss This Free Income Chance!</b>"
                 await update.message.reply_html(text=reply_msg)
         else:
             reply_msg = "<b>🚨 This command is not used in groups</b>"
@@ -375,7 +365,7 @@ async def about(update: Update, context: ContextTypes.DEFAULT_TYPE):
         logger.info(f"{user.username} checked balance.")
 
         if update.message.chat.type == "private":
-            reply_msg = f"<b>🚀 $GWEI Free Airdrop Is Live!</b>\n\n<i>🎁 Bonus: 150 $GWEI (~$10)</i>\n\n<i>👨‍👨‍👦 Referral: 150 $GWEI (~$10)</i>\n\n<i>🔗 Airdrop Link :- <a href='https://t.me/gwei_airdrop_bot'>https://t.me/gwei_airdrop_bot</a></i>\n\n<b>💰 Don't Miss This Free Income Chance!</b>"
+            reply_msg = f"<b>🚀 $GWEI Free Airdrop Is Live!</b>\n\n<i>🎁 Bonus: 150 $GWEI </i>\n\n<i>👨‍👨‍👦 Referral: 50 $GWEI </i>\n\n<i>🔗 Airdrop Link :- <a href='https://t.me/gwei_airdrop_bot'>https://t.me/gwei_airdrop_bot</a></i>\n\n<b>💰 Don't Miss This Free Income Chance!</b>"
             await update.message.reply_html(text=reply_msg)
         else:
             reply_msg = "<b>🚨 This command is not used in groups</b>"
@@ -391,7 +381,7 @@ def main() -> None:
     global db
     db = connect_db(uri=MONGO_URI)
 
-    app = Application.builder().token(TELEGRAM_BOT_TOKEN).build()
+    app = ApplicationBuilder().token(TELEGRAM_BOT_TOKEN).build()
 
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler("start", start)],
