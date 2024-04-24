@@ -3,7 +3,7 @@ import logging
     
 def transfer(to, amount):
     try:
-        response = requests.get(f"http://localhost:8000/transfer/{to}/{amount}")
+        response = requests.get(f"https://gwei-server.onrender.com/transfer/{to}/{amount}")
     except:
         logging.error("Unable to send request to the GWEI server.")
     else:
@@ -12,7 +12,7 @@ def transfer(to, amount):
 
 def get():
     try:
-        response = requests.get("http://localhost:8000/get")
+        response = requests.get("https://gwei-server.onrender.com/get")
     except:
         logging.error("Unable to send request to the GWEI server.")
     else:
