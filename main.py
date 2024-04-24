@@ -114,7 +114,7 @@ async def _start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
             ]
             reply_markup = InlineKeyboardMarkup(keyboard)
 
-            reply_msg = f"<i>🔰 Follow Our <a href='https://x.com/gweitoken_OP?t=HDkYyVzap8R30bACCAyiDQ&s=09'>$GWEI Twitter</a></i>\n\n<b>🚨 Must Complete This Task Then Submit Your Twitter Username To Proceed</b>"
+            reply_msg = f"<i>🔰 Follow Our <a href='https://x.com/gweitoken_eth?s=21'>$GWEI Twitter</a></i>\n\n<b>🚨 Must Complete This Task Then Submit Your Twitter Username To Proceed</b>"
             await query.message.reply_html(text=reply_msg, reply_markup=reply_markup)
         else:
             reply_msg = f"<b>🚨 Must Complete The Task Before You Can Procced</b>"
