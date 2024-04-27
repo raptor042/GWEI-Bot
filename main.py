@@ -37,10 +37,10 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
         if update.message.chat.type == "private":
             _user = get_user(db=db, query={"userId" : user.id})
-            info = get()
-            print(info)
+            # info = get()
+            # print(info)
 
-            if not _user:
+            if not _user or _user["balance"] == 0:
                 context.user_data["username"] = user.username
                 context.user_data["user_id"] = user.id
 
@@ -55,7 +55,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
                     update_user(db=db, query={"userId" : int(ref)}, value={"$push" : {"referrals" : user.username}})
                     update_user(db=db, query={"userId" : int(ref)}, value={"$inc" : {"referral_balance" : 50}})
 
-                user_ = set_user(db=db, value={"userId" : user.id, "username" : user.username, "balance" : 0, "address" : "0x0", "twitter": "--", "discord": "--", "referee": ref, "referrals": [], "referral_balance": 0})
+                user_ = set_user(db=db, value={"userId" : user.id, "username" : user.username, "balance" : 0, "address" : "0x0", "twitter": "--", "discord": "--", "medium": "--", "referee": ref, "referrals": [], "referral_balance": 0})
                 print(user_)
 
                 keyboard = [
@@ -66,7 +66,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
                 await update.message.reply_html(text=reply_msg, reply_markup=reply_markup)
             else:
-                reply_msg = f"<b>🚀 $GWEI Free Airdrop Is Live!</b>\n\n<i>🎁 Bonus: 150 $GWEI </i>\n\n<i>👨‍👨‍👦 Referral: 50 $GWEI </i>\n\n<i>🔗 Airdrop Link :- <a href='https://t.me/gwei_airdrop_bot?start={user.id}'>https://t.me/gwei_airdrop_bot?start={user.id}</a></i>\n\n<b>💰 Don't Miss This Free Income Chance!</b>"
+                reply_msg = f"<b>🚀 $GWEI Free Airdrop Is Live!</b>\n\n<i>🎁 Bonus: 150 $GWEI </i>\n\n<i>👨‍👨‍👦 Referral: 50 $GWEI </i>\n\n<i>🔗 Airdrop Link :- <a href='https://t.me/gwei_airdrop_bot?start={user.id}'>https://t.me/gwei_airdrop_bot?start={user.id}</a></i>\n\n<i>🔗 Follow Our <a href='https://x.com/gweitoken_eth?s=21'>$GWEI Twitter</a></i>\n\n<i>🔗 Join Our <a href='https://discord.com/invite/XRUyD4mt'>$GWEI Discord</a></i>\n\n<i>🔗 Join Our <a href='https://gweitoken-eth.medium.com/'>$GWEI Medium</a></i>\n\n<b>💰 Don't Miss This Free Income Chance!</b>"
                 await update.message.reply_html(text=reply_msg)
             
             return START
@@ -109,6 +109,8 @@ async def _start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
                 done = True
 
         if done:
+            context.user_data["twitter_count"] = 0
+
             keyboard = [
                 [InlineKeyboardButton("📝 Submit Twitter Username", callback_data="twitter")]
             ]
@@ -133,14 +135,23 @@ async def twitter(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         query = update.callback_query
         await query.answer()
 
+        context.user_data["twitter_count"] += 1
+
         username = context.user_data["username"]
         logger.info(f"{username} wants to enter twitter username.")
 
-        reply_msg = f"<i>🔰 Enter Your Twitter Username.</i>\n\n<b>🚨 Make sure while entering your twitter username, it begins with '@'.</b>"
+        if context.user_data["twitter_count"] >= 3:
+            reply_msg = f"<i>🔰 Enter Your Twitter Username.</i>\n\n<b>🚨 Make sure while entering your twitter username, it begins with '@'.</b>"
 
-        await query.message.reply_html(reply_msg)
+            await query.message.reply_html(reply_msg)
 
-        return START
+            return START
+        else:
+            reply_msg = f"<b>🚨 Make sure you have followed our Twitter handle.</b>"
+
+            await query.message.reply_html(reply_msg)
+
+            return START
     except Exception as e:
         print(e)
         logging.error("An error occured while processing this command.")
@@ -157,6 +168,8 @@ async def _twitter(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
         _user = update_user(db=db, query={"username" : user.username}, value={"$set" : {"twitter" : update.message.text.strip()}})
         print(_user)
+
+        context.user_data["discord_count"] = 0
 
         keyboard = [
             [InlineKeyboardButton("📝 Submit Discord Username", callback_data="discord")]
@@ -179,14 +192,23 @@ async def discord(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         query = update.callback_query
         await query.answer()
 
+        context.user_data["discord_count"] += 1
+
         username = context.user_data["username"]
         logger.info(f"{username} wants to enter discord username.")
 
-        reply_msg = f"<i>🔰 Enter Your Discord Username.</i>\n\n<b>🚨 Make sure while entering your discord username, it begins with '#'.</b>"
+        if context.user_data["discord_count"] >= 3:
+            reply_msg = f"<i>🔰 Enter Your Discord Username.</i>\n\n<b>🚨 Make sure while entering your discord username, it begins with '#'.</b>"
 
-        await query.message.reply_html(reply_msg)
+            await query.message.reply_html(reply_msg)
 
-        return START
+            return START
+        else:
+            reply_msg = f"<b>🚨 Make sure you have joined our Discord group.</b>"
+
+            await query.message.reply_html(reply_msg)
+
+            return START
     except Exception as e:
         print(e)
         logging.error("An error occured while processing this command.")
@@ -202,6 +224,63 @@ async def _discord(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         context.user_data["discord"] = update.message.text.strip()
 
         _user = update_user(db=db, query={"username" : user.username}, value={"$set" : {"discord" : update.message.text.strip()}})
+        print(_user)
+
+        context.user_data["medium_count"] = 0
+
+        keyboard = [
+            [InlineKeyboardButton("📝 Submit Medium Username", callback_data="medium")]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        reply_msg = f"<i>🔰 Join Our <a href='https://gweitoken-eth.medium.com/'>$GWEI Medium</a></i>\n\n<b>🚨 Must Complete This Task Then Submit Your Medium Username To Proceed</b>"
+
+        await update.message.reply_html(text=reply_msg, reply_markup=reply_markup)
+
+        return START
+    except Exception as e:
+        print(e)
+        logging.error("An error occured while processing this command.")
+
+        reply_msg = f"<b>🚨 {user.username}, An error occured while processing your request.</b>"
+        await update.message.reply_html(text=reply_msg)
+
+async def medium(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    try:
+        query = update.callback_query
+        await query.answer()
+
+        context.user_data["medium_count"] += 1
+
+        username = context.user_data["username"]
+        logger.info(f"{username} wants to enter medium username.")
+
+        if context.user_data["medium_count"] >= 3:
+            reply_msg = f"<i>🔰 Enter Your Medium Username.</i>\n\n<b>🚨 Make sure while entering your medium username, it begins with '#'.</b>"
+
+            await query.message.reply_html(reply_msg)
+
+            return START
+        else:
+            reply_msg = f"<b>🚨 Make sure you have joined our Medium page.</b>"
+
+            await query.message.reply_html(reply_msg)
+
+            return START
+    except Exception as e:
+        print(e)
+        logging.error("An error occured while processing this command.")
+
+        reply_msg = f"<b>🚨 {username}, An error occured while processing your request.</b>"
+        await query.message.reply_html(text=reply_msg)
+
+async def _medium(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    try:
+        user = update.message.from_user
+        logger.info(f"{user.username} has entered his/her medium username.")
+
+        context.user_data["medium"] = update.message.text.strip()
+
+        _user = update_user(db=db, query={"username" : user.username}, value={"$set" : {"medium" : update.message.text.strip()}})
         print(_user)
 
         reply_msg = f"<i>🔰 Enter Your Optimism Wallet Address.</i>\n\n<b>🚨 Make sure you enter the correct wallet address.</b>"
@@ -266,7 +345,7 @@ async def end(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 async def referral(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
         user = update.message.from_user
-        logger.info(f"{user.username} entered the referral command.")
+        logger.info(f"{user.username} entered the /referral command.")
 
         if update.message.chat.type == "private":
             _user = get_user(db=db, query={"userId" : user.id})
@@ -362,10 +441,28 @@ async def balance(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def about(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
         user = update.message.from_user
-        logger.info(f"{user.username} checked balance.")
+        logger.info(f"{user.username} entered the /about command.")
 
         if update.message.chat.type == "private":
-            reply_msg = f"<b>🚀 $GWEI Free Airdrop Is Live!</b>\n\n<i>🎁 Bonus: 150 $GWEI </i>\n\n<i>👨‍👨‍👦 Referral: 50 $GWEI </i>\n\n<i>🔗 Airdrop Link :- <a href='https://t.me/gwei_airdrop_bot'>https://t.me/gwei_airdrop_bot</a></i>\n\n<b>💰 Don't Miss This Free Income Chance!</b>"
+            reply_msg = f"<b>🚀 $GWEI Free Airdrop Is Live!</b>\n\n<i>🎁 Bonus: 150 $GWEI </i>\n\n<i>👨‍👨‍👦 Referral: 50 $GWEI </i>\n\n<i>🔗 Airdrop Link :- <a href='https://t.me/gwei_airdrop_bot?start={user.id}'>https://t.me/gwei_airdrop_bot?start={user.id}</a></i>\n\n<i>🔗 Follow Our <a href='https://x.com/gweitoken_eth?s=21'>$GWEI Twitter</a></i>\n\n<i>🔗 Join Our <a href='https://discord.com/invite/XRUyD4mt'>$GWEI Discord</a></i>\n\n<i>🔗 Join Our <a href='https://gweitoken-eth.medium.com/'>$GWEI Medium</a></i>\n\n<b>💰 Don't Miss This Free Income Chance!</b>"
+            await update.message.reply_html(text=reply_msg)
+        else:
+            reply_msg = "<b>🚨 This command is not used in groups</b>"
+            await update.message.reply_html(text=reply_msg)
+    except Exception as e:
+        print(e)
+        logging.error("An error occured while processing this command.")
+
+        reply_msg = f"<b>🚨 {user.username}, An error occured while processing your request.</b>"
+        await update.message.reply_html(text=reply_msg)
+
+async def links(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    try:
+        user = update.message.from_user
+        logger.info(f"{user.username} entered the /links command.")
+
+        if update.message.chat.type == "private":
+            reply_msg = f"<b>🚀 $GWEI Free Airdrop Is Live!</b>\n\n<i>🔗 Airdrop Link :- <a href='https://t.me/gwei_airdrop_bot?start={user.id}'>https://t.me/gwei_airdrop_bot?start={user.id}</a></i>\n\n<i>🔗 Follow Our <a href='https://x.com/gweitoken_eth?s=21'>$GWEI Twitter</a></i>\n\n<i>🔗 Join Our <a href='https://discord.com/invite/XRUyD4mt'>$GWEI Discord</a></i>\n\n<i>🔗 Join Our <a href='https://gweitoken-eth.medium.com/'>$GWEI Medium</a></i>\n\n<b>💰 Don't Miss This Free Income Chance!</b>"
             await update.message.reply_html(text=reply_msg)
         else:
             reply_msg = "<b>🚨 This command is not used in groups</b>"
@@ -393,6 +490,8 @@ def main() -> None:
                 MessageHandler(filters.Regex("^@"), _twitter),
                 CallbackQueryHandler(discord, pattern="^discord$"),
                 MessageHandler(filters.Regex("^#"), _discord),
+                CallbackQueryHandler(medium, pattern="^medium$"),
+                MessageHandler(filters.Regex("^#"), _medium),
                 MessageHandler(filters.Regex("^0x"), address)
             ],
             END: [
@@ -406,6 +505,7 @@ def main() -> None:
     balance_handler = CommandHandler("balance", balance)
     withdraw_handler = CommandHandler("withdraw", withdraw)
     about_handler = CommandHandler("about", about)
+    links_handler = CommandHandler("links", links)
 
     app.add_handler(conv_handler)
     app.add_handler(start_handler)
@@ -413,6 +513,7 @@ def main() -> None:
     app.add_handler(balance_handler)
     app.add_handler(withdraw_handler)
     app.add_handler(about_handler)
+    app.add_handler(links_handler)
 
     app.run_polling(allowed_updates=Update.ALL_TYPES)
 
