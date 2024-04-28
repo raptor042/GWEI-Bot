@@ -146,12 +146,6 @@ async def twitter(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
             await query.message.reply_html(reply_msg)
 
             return START
-        else:
-            reply_msg = f"<b>🚨 Make sure you have followed our Twitter handle.</b>"
-
-            await query.message.reply_html(reply_msg)
-
-            return START
     except Exception as e:
         print(e)
         logging.error("An error occured while processing this command.")
@@ -203,12 +197,6 @@ async def discord(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
             await query.message.reply_html(reply_msg)
 
             return START
-        else:
-            reply_msg = f"<b>🚨 Make sure you have joined our Discord group.</b>"
-
-            await query.message.reply_html(reply_msg)
-
-            return START
     except Exception as e:
         print(e)
         logging.error("An error occured while processing this command.")
@@ -255,13 +243,7 @@ async def medium(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         logger.info(f"{username} wants to enter medium username.")
 
         if context.user_data["medium_count"] >= 3:
-            reply_msg = f"<i>🔰 Enter Your Medium Username.</i>\n\n<b>🚨 Make sure while entering your medium username, it begins with '#'.</b>"
-
-            await query.message.reply_html(reply_msg)
-
-            return START
-        else:
-            reply_msg = f"<b>🚨 Make sure you have joined our Medium page.</b>"
+            reply_msg = f"<i>🔰 Enter Your Medium Username.</i>\n\n<b>🚨 Make sure while entering your medium username, it begins with '&'.</b>"
 
             await query.message.reply_html(reply_msg)
 
@@ -491,7 +473,7 @@ def main() -> None:
                 CallbackQueryHandler(discord, pattern="^discord$"),
                 MessageHandler(filters.Regex("^#"), _discord),
                 CallbackQueryHandler(medium, pattern="^medium$"),
-                MessageHandler(filters.Regex("^#"), _medium),
+                MessageHandler(filters.Regex("^&"), _medium),
                 MessageHandler(filters.Regex("^0x"), address)
             ],
             END: [
