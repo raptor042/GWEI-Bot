@@ -40,7 +40,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
             # info = get()
             # print(info)
 
-            if not _user or _user["completed"]:
+            if not _user or not _user["completed"]:
                 context.user_data["username"] = user.username
                 context.user_data["user_id"] = user.id
 
