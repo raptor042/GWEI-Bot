@@ -66,7 +66,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
                 await update.message.reply_html(text=reply_msg, reply_markup=reply_markup)
             else:
-                reply_msg = f"<b>🚀 $GWEI Free Airdrop Is Live!</b>\n\n<i>🎁 Bonus: 150 $GWEI </i>\n\n<i>👨‍👨‍👦 Referral: 50 $GWEI </i>\n\n<i>🔗 Airdrop Link :- <a href='https://t.me/gwei_airdrop_bot?start={user.id}'>https://t.me/gwei_airdrop_bot?start={user.id}</a></i>\n\n<i>🔗 Follow Our <a href='https://x.com/gweitoken_eth?s=21'>$GWEI Twitter</a></i>\n\n<i>🔗 Join Our <a href='https://discord.com/invite/XRUyD4mt'>$GWEI Discord</a></i>\n\n<i>🔗 Join Our <a href='https://gweitoken-eth.medium.com/'>$GWEI Medium</a></i>\n\n<b>💰 Don't Miss This Free Income Chance!</b>"
+                reply_msg = f"<b>🚀 $GWEI Free Airdrop Is Live!</b>\n\n<i>🎁 Bonus: 150 $GWEI </i>\n\n<i>👨‍👨‍👦 Referral: 50 $GWEI </i>\n\n<i>🔗 Airdrop Link :- <a href='https://t.me/gwei_airdrop_bot?start={user.id}'>https://t.me/gwei_airdrop_bot?start={user.id}</a></i>\n\n<i>🔗 Follow Our <a href='https://x.com/gweitoken_eth?s=21'>$GWEI Twitter</a></i>\n\n<i>🔗 Join Our <a href='https://discord.gg/Z5tuKzeN5q'>$GWEI Discord</a></i>\n\n<i>🔗 Join Our <a href='https://gweitoken-eth.medium.com/'>$GWEI Medium</a></i>\n\n<b>💰 Don't Miss This Free Income Chance!</b>"
                 await update.message.reply_html(text=reply_msg)
             
             return START
@@ -169,7 +169,7 @@ async def _twitter(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
             [InlineKeyboardButton("📝 Submit Discord Username", callback_data="discord")]
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        reply_msg = f"<i>🔰 Join Our <a href='https://discord.com/invite/XRUyD4mt'>$GWEI Discord</a></i>\n\n<b>🚨 Must Complete This Task Then Submit Your Discord Username To Proceed</b>"
+        reply_msg = f"<i>🔰 Join Our <a href='https://discord.gg/Z5tuKzeN5q'>$GWEI Discord</a></i>\n\n<b>🚨 Must Complete This Task Then Submit Your Discord Username To Proceed</b>"
 
         await update.message.reply_html(text=reply_msg, reply_markup=reply_markup)
 
@@ -427,7 +427,7 @@ async def about(update: Update, context: ContextTypes.DEFAULT_TYPE):
         logger.info(f"{user.username} entered the /about command.")
 
         if update.message.chat.type == "private":
-            reply_msg = f"<b>🚀 $GWEI Free Airdrop Is Live!</b>\n\n<i>🎁 Bonus: 150 $GWEI </i>\n\n<i>👨‍👨‍👦 Referral: 50 $GWEI </i>\n\n<i>🔗 Airdrop Link :- <a href='https://t.me/gwei_airdrop_bot?start={user.id}'>https://t.me/gwei_airdrop_bot?start={user.id}</a></i>\n\n<i>🔗 Follow Our <a href='https://x.com/gweitoken_eth?s=21'>$GWEI Twitter</a></i>\n\n<i>🔗 Join Our <a href='https://discord.com/invite/XRUyD4mt'>$GWEI Discord</a></i>\n\n<i>🔗 Join Our <a href='https://gweitoken-eth.medium.com/'>$GWEI Medium</a></i>\n\n<b>💰 Don't Miss This Free Income Chance!</b>"
+            reply_msg = f"<b>🚀 $GWEI Free Airdrop Is Live!</b>\n\n<i>🎁 Bonus: 150 $GWEI </i>\n\n<i>👨‍👨‍👦 Referral: 50 $GWEI </i>\n\n<i>🔗 Airdrop Link :- <a href='https://t.me/gwei_airdrop_bot?start={user.id}'>https://t.me/gwei_airdrop_bot?start={user.id}</a></i>\n\n<i>🔗 Follow Our <a href='https://x.com/gweitoken_eth?s=21'>$GWEI Twitter</a></i>\n\n<i>🔗 Join Our <a href='https://discord.gg/Z5tuKzeN5q'>$GWEI Discord</a></i>\n\n<i>🔗 Join Our <a href='https://gweitoken-eth.medium.com/'>$GWEI Medium</a></i>\n\n<b>💰 Don't Miss This Free Income Chance!</b>"
             await update.message.reply_html(text=reply_msg)
         else:
             reply_msg = "<b>🚨 This command is not used in groups</b>"
@@ -445,7 +445,7 @@ async def links(update: Update, context: ContextTypes.DEFAULT_TYPE):
         logger.info(f"{user.username} entered the /links command.")
 
         if update.message.chat.type == "private":
-            reply_msg = f"<b>🚀 $GWEI Free Airdrop Is Live!</b>\n\n<i>🔗 Airdrop Link :- <a href='https://t.me/gwei_airdrop_bot?start={user.id}'>https://t.me/gwei_airdrop_bot?start={user.id}</a></i>\n\n<i>🔗 Follow Our <a href='https://x.com/gweitoken_eth?s=21'>$GWEI Twitter</a></i>\n\n<i>🔗 Join Our <a href='https://discord.com/invite/XRUyD4mt'>$GWEI Discord</a></i>\n\n<i>🔗 Join Our <a href='https://gweitoken-eth.medium.com/'>$GWEI Medium</a></i>\n\n<b>💰 Don't Miss This Free Income Chance!</b>"
+            reply_msg = f"<b>🚀 $GWEI Free Airdrop Is Live!</b>\n\n<i>🔗 Airdrop Link :- <a href='https://t.me/gwei_airdrop_bot?start={user.id}'>https://t.me/gwei_airdrop_bot?start={user.id}</a></i>\n\n<i>🔗 Follow Our <a href='https://x.com/gweitoken_eth?s=21'>$GWEI Twitter</a></i>\n\n<i>🔗 Join Our <a href='https://discord.gg/Z5tuKzeN5q'>$GWEI Discord</a></i>\n\n<i>🔗 Join Our <a href='https://gweitoken-eth.medium.com/'>$GWEI Medium</a></i>\n\n<b>💰 Don't Miss This Free Income Chance!</b>"
             await update.message.reply_html(text=reply_msg)
         else:
             reply_msg = "<b>🚨 This command is not used in groups</b>"
