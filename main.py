@@ -40,7 +40,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
             # info = get()
             # print(info)
 
-            if not _user or _user["balance"] == 0:
+            if not _user or _user["completed"]:
                 context.user_data["username"] = user.username
                 context.user_data["user_id"] = user.id
 
@@ -55,7 +55,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
                     update_user(db=db, query={"userId" : int(ref)}, value={"$push" : {"referrals" : user.username}})
                     update_user(db=db, query={"userId" : int(ref)}, value={"$inc" : {"referral_balance" : 50}})
 
-                user_ = set_user(db=db, value={"userId" : user.id, "username" : user.username, "balance" : 0, "address" : "0x0", "twitter": "--", "discord": "--", "medium": "--", "referee": ref, "referrals": [], "referral_balance": 0})
+                user_ = set_user(db=db, value={"userId" : user.id, "username" : user.username, "balance" : 0, "address" : "0x0", "twitter": "--", "discord": "--", "medium": "--", "referee": ref, "referrals": [], "referral_balance": 0, "completed": False})
                 print(user_)
 
                 keyboard = [
@@ -286,6 +286,7 @@ async def address(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
         _user = update_user(db=db, query={"username" : user.username}, value={"$set" : {"address" : update.message.text.strip()}})
         _user = update_user(db=db, query={"username" : user.username}, value={"$inc" : {"balance" : 150}})
+        _user = update_user(db=db, query={"username" : user.username}, value={"$set" : {"completed" : True}})
         print(_user)
 
         keyboard = [
@@ -370,15 +371,15 @@ async def withdraw(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 referrals = len(_user["referrals"])
 
                 if referrals >= 1 and (balance + ref_balance) > 0:
+                    reply_msg = f"<b>🔰 Your Total Balance Is {balance + ref_balance} $GWEI.</b>\n\n<i>🪫 Your withdrawal is been processed. This will take between 5 - 10 minutes.</i>\n\n<i>🔗 Your referral link is <a href='https://t.me/gwei_airdrop_bot?start={user.id}'>https://t.me/gwei_airdrop_bot?start={user.id}</a></i>\n\n<b>🚀 Please Share So Others Don't Miss This Free Income Chance!</b>"
+                    await update.message.reply_html(text=reply_msg)
+
                     _transfer = transfer(_user["address"], int(balance + ref_balance))
                     print(_transfer)
 
                     user_ = update_user(db=db, query={"userId" : user.id}, value={"$set" :{"balance" : 0}})
                     user_ = update_user(db=db, query={"userId" : user.id}, value={"$set" :{"referral_balance" : 0}})
                     print(user_)
-
-                    reply_msg = f"<b>🔰 Your Total Balance Is {balance + ref_balance} $GWEI.</b>\n\n<i>🪫 Your withdrawal is been processed. This will take between 5 - 10 minutes.</i>\n\n<i>🔗 Your referral link is <a href='https://t.me/gwei_airdrop_bot?start={user.id}'>https://t.me/gwei_airdrop_bot?start={user.id}</a></i>\n\n<b>🚀 Please Share So Others Don't Miss This Free Income Chance!</b>"
-                    await update.message.reply_html(text=reply_msg)
                 else:
                     reply_msg = f"<b>🚨 Insufficent Funds OR You Do Not Have Enough Referrals, Your Referrals Are {referrals}.</b>"
                     await update.message.reply_html(text=reply_msg)
