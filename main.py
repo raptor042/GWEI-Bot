@@ -55,6 +55,9 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
                     update_user(db=db, query={"userId" : int(ref)}, value={"$push" : {"referrals" : user.username}})
                     update_user(db=db, query={"userId" : int(ref)}, value={"$inc" : {"referral_balance" : 50}})
 
+                    text = f"{user.username} just used your referral link. 📢 Please continue to share so others don't miss this free income chance!"
+                    context.bot.send_message(chat_id=ref, text=text)
+
                 user_ = set_user(db=db, value={"userId" : user.id, "username" : user.username, "balance" : 0, "address" : "0x0", "twitter": "--", "discord": "--", "medium": "--", "referee": ref, "referrals": [], "referral_balance": 0, "completed": False})
                 print(user_)
 
@@ -140,8 +143,14 @@ async def twitter(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         username = context.user_data["username"]
         logger.info(f"{username} wants to enter twitter username.")
 
-        if context.user_data["twitter_count"] >= 3:
+        if context.user_data["twitter_count"] >= 1:
             reply_msg = f"<i>🔰 Enter Your Twitter Username.</i>\n\n<b>🚨 Make sure while entering your twitter username, it begins with '@'.</b>"
+
+            await query.message.reply_html(reply_msg)
+
+            return START
+        else:
+            reply_msg = "<b>🚨 Could not verify the completion of this task, Make sure you complete the task before submitting your twitter username.</b>"
 
             await query.message.reply_html(reply_msg)
 
@@ -197,6 +206,12 @@ async def discord(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
             await query.message.reply_html(reply_msg)
 
             return START
+        else:
+            reply_msg = "<b>🚨 Could not verify the completion of this task, Make sure you complete the task before submitting your discord username.</b>"
+
+            await query.message.reply_html(reply_msg)
+
+            return START
     except Exception as e:
         print(e)
         logging.error("An error occured while processing this command.")
@@ -244,6 +259,12 @@ async def medium(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
         if context.user_data["medium_count"] >= 3:
             reply_msg = f"<i>🔰 Enter Your Medium Username.</i>\n\n<b>🚨 Make sure while entering your medium username, it begins with '&'.</b>"
+
+            await query.message.reply_html(reply_msg)
+
+            return START
+        else:
+            reply_msg = "<b>🚨 Could not verify the completion of this task, Make sure you complete the task before submitting your medium username.</b>"
 
             await query.message.reply_html(reply_msg)
 
