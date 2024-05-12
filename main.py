@@ -143,7 +143,7 @@ async def twitter(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         username = context.user_data["username"]
         logger.info(f"{username} wants to enter twitter username.")
 
-        if context.user_data["twitter_count"] >= 1:
+        if context.user_data["twitter_count"] > 1:
             reply_msg = f"<i>🔰 Enter Your Twitter Username.</i>\n\n<b>🚨 Make sure while entering your twitter username, it begins with '@'.</b>"
 
             await query.message.reply_html(reply_msg)
@@ -200,7 +200,7 @@ async def discord(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         username = context.user_data["username"]
         logger.info(f"{username} wants to enter discord username.")
 
-        if context.user_data["discord_count"] >= 3:
+        if context.user_data["discord_count"] > 1:
             reply_msg = f"<i>🔰 Enter Your Discord Username.</i>\n\n<b>🚨 Make sure while entering your discord username, it begins with '#'.</b>"
 
             await query.message.reply_html(reply_msg)
@@ -257,7 +257,7 @@ async def medium(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         username = context.user_data["username"]
         logger.info(f"{username} wants to enter medium username.")
 
-        if context.user_data["medium_count"] >= 3:
+        if context.user_data["medium_count"] > 1:
             reply_msg = f"<i>🔰 Enter Your Medium Username.</i>\n\n<b>🚨 Make sure while entering your medium username, it begins with '&'.</b>"
 
             await query.message.reply_html(reply_msg)
