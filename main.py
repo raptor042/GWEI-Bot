@@ -55,7 +55,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
                     update_user(db=db, query={"userId" : int(ref)}, value={"$push" : {"referrals" : user.username}})
                     update_user(db=db, query={"userId" : int(ref)}, value={"$inc" : {"referral_balance" : 50}})
 
-                    text = f"{user.username} just used your referral link. 📢 Please continue to share so others don't miss this free income chance!"
+                    text = f"🎉🎉🎉🎉🎉🎉\n\n{user.username} just used your referral link.\n\n📢 Please continue to share so others don't miss this free income chance!"
                     await context.bot.send_message(chat_id=int(ref), text=text)
 
                 user_ = set_user(db=db, value={"userId" : user.id, "username" : user.username, "balance" : 0, "address" : "0x0", "twitter": "--", "discord": "--", "medium": "--", "referee": ref, "referrals": [], "referral_balance": 0, "completed": False})
